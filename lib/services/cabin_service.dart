@@ -1,19 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:dio/dio.dart';
+import 'dart:convert';
 import '../models/cabin_models.dart';
 import '../config/app_config.dart';
 
 class CabinService with ChangeNotifier {
   late String baseUrl;
   late String wsUrl;
+  late Dio _dio;
 
   CabinService() {
     baseUrl = AppConfig.apiBaseUrl;
     wsUrl = AppConfig.wsUrl;
+    _dio = Dio(BaseOptions(
+      baseUrl: baseUrl,
+      connectTimeout: const Duration(seconds: 5),
+      receiveTimeout: const Duration(seconds: 5),
+    ));
   }
 
-  final Dio _dio = Dio(BaseOptions(baseUrl: baseUrl));
   WebSocketChannel? _wsChannel;
 
   String? _selectedAircraftId;
@@ -96,8 +102,9 @@ class CabinService with ChangeNotifier {
 
   Map<String, dynamic> _parseJsonString(String jsonString) {
     try {
-      return {}; // TODO: Implement JSON parsing
+      return jsonDecode(jsonString) as Map<String, dynamic>;
     } catch (e) {
+      print('[v0] JSON parse error: $e for string: $jsonString');
       return {};
     }
   }
@@ -105,28 +112,35 @@ class CabinService with ChangeNotifier {
   // REST API calls
   Future<void> fetchCabinStatus() async {
     try {
-      if (_selectedAircraftId == null) return;
-      
+      if (_selectedAircraftId == null) {
+        print('[v0] No aircraft selected');
+        return;
+      }
+
+      print('[v0] Fetching cabin status for: $_selectedAircraftId');
       final response = await _dio.get('/aircraft/$_selectedAircraftId/status');
+      print('[v0] Cabin status response: ${response.data}');
       _cabinStatus = CabinStatus.fromJson(response.data);
       notifyListeners();
     } catch (e) {
-      print('Error fetching cabin status: $e');
+      print('[v0] Error fetching cabin status: $e');
     }
   }
 
   Future<void> fetchAlerts() async {
     try {
       if (_selectedAircraftId == null) return;
-      
+
+      print('[v0] Fetching alerts for: $_selectedAircraftId');
       final response = await _dio.get('/aircraft/$_selectedAircraftId/alerts');
+      print('[v0] Alerts response: ${response.data}');
       final alertList = response.data as List;
       _alerts = alertList
           .map((a) => CabinAlert.fromJson(a as Map<String, dynamic>))
           .toList();
       notifyListeners();
     } catch (e) {
-      print('Error fetching alerts: $e');
+      print('[v0] Error fetching alerts: $e');
     }
   }
 
