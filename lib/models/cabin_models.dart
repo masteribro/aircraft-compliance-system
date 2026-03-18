@@ -1,3 +1,7 @@
+import 'dart:ui';
+
+import 'package:flutter/material.dart';
+
 class Aircraft {
   final String id;
   final String tailNumber;
@@ -132,4 +136,3 @@ class CabinStatus {
   }
 }
 
-import 'package:flutter/material.dart';

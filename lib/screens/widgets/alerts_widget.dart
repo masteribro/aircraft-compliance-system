@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../models/cabin_models.dart';
 import '../../services/cabin_service.dart';
 
 class AlertsWidget extends StatelessWidget {
