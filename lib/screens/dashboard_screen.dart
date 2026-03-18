@@ -24,10 +24,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<void> _initializeService() async {
-    final cabinService = context.read<CabinService>();
-    // TODO: Replace with actual aircraft ID from backend
-    _selectedAircraftId = 'demo-aircraft-001';
-    await cabinService.selectAircraft(_selectedAircraftId!);
+    // Delay the initialization to after the first frame to avoid setState during build
+    if (!mounted) return;
+    
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      
+      final cabinService = context.read<CabinService>();
+      // TODO: Replace with actual aircraft ID from backend
+      _selectedAircraftId = 'demo-aircraft-001';
+      await cabinService.selectAircraft(_selectedAircraftId!);
+    });
   }
 
   @override

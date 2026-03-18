@@ -2,10 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:dio/dio.dart';
 import '../models/cabin_models.dart';
+import '../config/app_config.dart';
 
 class CabinService with ChangeNotifier {
-  static const String baseUrl = 'http://localhost:8080/api';
-  static const String wsUrl = 'ws://localhost:8080/ws/cabin';
+  late String baseUrl;
+  late String wsUrl;
+
+  CabinService() {
+    baseUrl = AppConfig.apiBaseUrl;
+    wsUrl = AppConfig.wsUrl;
+  }
 
   final Dio _dio = Dio(BaseOptions(baseUrl: baseUrl));
   WebSocketChannel? _wsChannel;
@@ -26,9 +32,12 @@ class CabinService with ChangeNotifier {
   // Select aircraft and connect
   Future<void> selectAircraft(String aircraftId) async {
     _selectedAircraftId = aircraftId;
-    await connectWebSocket();
-    await fetchCabinStatus();
-    notifyListeners();
+    try {
+      await connectWebSocket();
+      await fetchCabinStatus();
+    } catch (e) {
+      print('Error selecting aircraft: $e');
+    }
   }
 
   // WebSocket connection
@@ -36,6 +45,7 @@ class CabinService with ChangeNotifier {
     try {
       _wsChannel = WebSocketChannel.connect(Uri.parse(wsUrl));
       _isConnected = true;
+      notifyListeners();
       
       _wsChannel?.stream.listen(
         (message) => _handleWebSocketMessage(message),
@@ -48,8 +58,6 @@ class CabinService with ChangeNotifier {
           notifyListeners();
         },
       );
-      
-      notifyListeners();
     } catch (e) {
       print('WebSocket connection error: $e');
       _isConnected = false;
