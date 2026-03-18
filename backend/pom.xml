@@ -51,10 +51,11 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- Liquibase for Schema Versioning -->
+        <!-- H2 Database for development/testing -->
         <dependency>
-            <groupId>org.liquibase</groupId>
-            <artifactId>liquibase-core</artifactId>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
         </dependency>
 
         <!-- Security -->
