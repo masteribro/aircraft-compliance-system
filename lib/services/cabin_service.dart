@@ -15,9 +15,11 @@ class CabinService with ChangeNotifier {
     wsUrl = AppConfig.wsUrl;
     _dio = Dio(BaseOptions(
       baseUrl: baseUrl,
-      connectTimeout: const Duration(seconds: 5),
-      receiveTimeout: const Duration(seconds: 5),
+      connectTimeout: Duration(seconds: AppConfig.connectTimeout),
+      receiveTimeout: Duration(seconds: AppConfig.receiveTimeout),
     ));
+    
+    print('[v0] CabinService initialized with baseUrl: $baseUrl, wsUrl: $wsUrl');
   }
 
   WebSocketChannel? _wsChannel;
