@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: aircraft-compliance-system
+  datasource:
+    url: jdbc:postgresql://localhost:5432/aircraft_db
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.xml
+    enabled: true
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+jwt:
+  secret: your-secret-key-change-in-production-min-32-chars
+  expiration: 86400000
+
+logging:
+  level:
+    root: INFO
+    com.aircraft.compliance: DEBUG
