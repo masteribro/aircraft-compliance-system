@@ -31,8 +31,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
       if (!mounted) return;
       
       final cabinService = context.read<CabinService>();
-      // TODO: Replace with actual aircraft ID from backend
-      _selectedAircraftId = 'demo-aircraft-001';
+      // Use the UUID that matches the backend DataInitializer
+      _selectedAircraftId = '550e8400-e29b-41d4-a716-446655440000';
+      print('[v0] Initializing service with aircraft ID: $_selectedAircraftId');
       await cabinService.selectAircraft(_selectedAircraftId!);
     });
   }
