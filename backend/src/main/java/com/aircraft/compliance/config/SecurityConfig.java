@@ -18,16 +18,19 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .csrf().disable()
-            .cors()
-            .and()
+            .cors().and()
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers("/api/**").permitAll()
                 .requestMatchers("/ws/**").permitAll()
                 .requestMatchers("/aircraft/**").permitAll()
                 .requestMatchers("/alerts/**").permitAll()
+                .requestMatchers("/app/**").permitAll()
+                .requestMatchers("/topic/**").permitAll()
+                .requestMatchers("/**").permitAll()
                 .anyRequest().permitAll()
             )
-            .httpBasic().disable();
+            .httpBasic().disable()
+            .formLogin().disable();
 
         return http.build();
     }
@@ -35,13 +38,16 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("*"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
-        configuration.setAllowCredentials(false);
+        configuration.setExposedHeaders(Arrays.asList("*"));
+        configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
 }
+

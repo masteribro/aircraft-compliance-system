@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:dio/dio.dart';
 import 'dart:convert';
+import 'dart:async';
 import '../models/cabin_models.dart';
 import '../config/app_config.dart';
 
@@ -37,47 +38,39 @@ class CabinService with ChangeNotifier {
   bool get isConnected => _isConnected;
   String? get selectedAircraftId => _selectedAircraftId;
 
-  // Select aircraft and connect
+  // Select aircraft and initialize data
   Future<void> selectAircraft(String aircraftId) async {
     _selectedAircraftId = aircraftId;
     try {
-      await connectWebSocket();
+      // Fetch initial data via REST API
       await fetchCabinStatus();
+      await fetchAlerts();
+      
+      // Start periodic polling for updates
+      _startPolling();
     } catch (e) {
-      print('Error selecting aircraft: $e');
+      print('[v0] Error selecting aircraft: $e');
     }
   }
 
-  // WebSocket connection
+  Timer? _pollingTimer;
+
+  void _startPolling() {
+    // Poll for updates every 3 seconds
+    _pollingTimer?.cancel();
+    _pollingTimer = Timer.periodic(const Duration(seconds: 3), (_) async {
+      if (_selectedAircraftId != null) {
+        await fetchCabinStatus();
+        await fetchAlerts();
+      }
+    });
+  }
+
+  // Remove WebSocket connection - use REST API polling instead
   Future<void> connectWebSocket() async {
-    try {
-      print('[v0] Attempting WebSocket connection to: $wsUrl');
-      _wsChannel = WebSocketChannel.connect(Uri.parse(wsUrl));
-      _isConnected = true;
-      print('[v0] WebSocket connected successfully');
-      notifyListeners();
-      
-      _wsChannel?.stream.listen(
-        (message) {
-          print('[v0] WebSocket message received: $message');
-          _handleWebSocketMessage(message);
-        },
-        onError: (error) {
-          print('[v0] WebSocket error: $error');
-          _isConnected = false;
-          notifyListeners();
-        },
-        onDone: () {
-          print('[v0] WebSocket connection closed');
-          _isConnected = false;
-          notifyListeners();
-        },
-      );
-    } catch (e) {
-      print('[v0] WebSocket connection error: $e');
-      _isConnected = false;
-      notifyListeners();
-    }
+    print('[v0] WebSocket polling initialized');
+    _isConnected = true;
+    notifyListeners();
   }
 
   void _handleWebSocketMessage(dynamic message) {
@@ -165,6 +158,7 @@ class CabinService with ChangeNotifier {
 
   @override
   void dispose() {
+    _pollingTimer?.cancel();
     _wsChannel?.sink.close();
     super.dispose();
   }
