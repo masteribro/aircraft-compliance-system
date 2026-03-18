@@ -51,23 +51,30 @@ class CabinService with ChangeNotifier {
   // WebSocket connection
   Future<void> connectWebSocket() async {
     try {
+      print('[v0] Attempting WebSocket connection to: $wsUrl');
       _wsChannel = WebSocketChannel.connect(Uri.parse(wsUrl));
       _isConnected = true;
+      print('[v0] WebSocket connected successfully');
       notifyListeners();
       
       _wsChannel?.stream.listen(
-        (message) => _handleWebSocketMessage(message),
+        (message) {
+          print('[v0] WebSocket message received: $message');
+          _handleWebSocketMessage(message);
+        },
         onError: (error) {
+          print('[v0] WebSocket error: $error');
           _isConnected = false;
           notifyListeners();
         },
         onDone: () {
+          print('[v0] WebSocket connection closed');
           _isConnected = false;
           notifyListeners();
         },
       );
     } catch (e) {
-      print('WebSocket connection error: $e');
+      print('[v0] WebSocket connection error: $e');
       _isConnected = false;
       notifyListeners();
     }
