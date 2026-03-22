@@ -8,6 +8,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import java.util.Arrays;
 
 @Configuration
@@ -17,20 +18,20 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf().disable()
-            .cors().and()
+            .csrf(csrf -> csrf.disable())
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(authz -> authz
-                .requestMatchers("/api/**").permitAll()
-                .requestMatchers("/ws/**").permitAll()
-                .requestMatchers("/aircraft/**").permitAll()
-                .requestMatchers("/alerts/**").permitAll()
-                .requestMatchers("/app/**").permitAll()
-                .requestMatchers("/topic/**").permitAll()
-                .requestMatchers("/**").permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/api/**")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/ws/**")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/aircraft/**")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/alerts/**")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/app/**")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/topic/**")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/**")).permitAll()
                 .anyRequest().permitAll()
             )
-            .httpBasic().disable()
-            .formLogin().disable();
+            .httpBasic(httpBasic -> httpBasic.disable())
+            .formLogin(formLogin -> formLogin.disable());
 
         return http.build();
     }
@@ -50,4 +51,5 @@ public class SecurityConfig {
         return source;
     }
 }
+
 
